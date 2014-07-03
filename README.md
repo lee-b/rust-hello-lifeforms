@@ -1,4 +1,5 @@
 rust-hello-lifeforms
 ====================
 
-Hello Lifeforms (a genetic algorithm), written in Rust
+Hello Lifeforms.  A genetic algorithm, written in Rust.
+
