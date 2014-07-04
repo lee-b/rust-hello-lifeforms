@@ -15,7 +15,7 @@ Details
 
 This... wait for it... counts up to a big number! ;)  [currently, I mean]
 
-The algorithm is generic though, and should have pluggable Individuals (things to evolve), Evaluators (goals), and breeding soon.  This will make it capable of doing lots of things, in lots of different ways.
+The algorithm is generic though, and should have pluggable species of Individuals (things to evolve), Evaluators (goals), and custom breeding methods (for different species) soon.  This will make it capable of doing lots of things, in lots of different ways.
 
 What the algorithm does is:
 
