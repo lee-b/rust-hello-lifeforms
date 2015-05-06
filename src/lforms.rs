@@ -1,22 +1,22 @@
-use std::rand;
-use std::rand::Rng;
+extern crate rand;
+use rand::{thread_rng, Rng};
 
 type Fitness = f64;
 
-#[deriving(PartialEq,Clone,Show)]
+#[derive(PartialEq,Clone,Debug)]
 struct Individual {
     genes : u32
 }
 
-struct Population<'a> {
+struct Population {
     individuals : Vec<Individual>
 }
 
-impl<'a> Population<'a> {
+impl Population {
     fn new<R: Rng>(pop_size: u32, rng: &mut R) -> Population {
         let mut indivs = Vec::new();
 
-        for _ in range(0, pop_size) {
+        for _ in 0..pop_size {
             let indiv = Individual { genes: rng.gen_range(1, 32) };
             indivs.push(indiv);
         }
@@ -41,7 +41,7 @@ fn select_indiv<'a, R: Rng>(pop: &'a [Individual], rng: &mut R) -> &'a Individua
 }
 
 fn naturally_select_indiv<'a, R: Rng>(pop: &'a Population, rng: &mut R, eval: &mut Evaluator) -> &'a Individual {
-    let pop_slice = pop.individuals.as_slice();
+    let pop_slice = &*pop.individuals;
 
     let suitor1 = select_indiv(pop_slice, rng);
     let suitor2 = select_indiv(pop_slice, rng);
@@ -73,7 +73,7 @@ impl Evolver {
 
         assert!(pop_size >= 2);
  
-        for _child_num in range(1, pop_size+1) {
+        for _child_num in 1..pop_size+1 {
 //            println!("    Evolving individual {} of {}", child_num, pop_size);
             let (mom, dad) = select_parents(old_pop, rng, eval);
 //            println!("Selected parents: {} and {}", mom, dad);
@@ -93,7 +93,7 @@ fn breed(mom : &Individual, dad: &Individual) -> Individual {
 fn main() {
     println!("Building population...");
 
-    let mut rng = rand::task_rng();
+    let mut rng = rand::thread_rng();
 
     let mut pop : Population = Population::new(1_000_000, &mut rng);
     let evolver = Evolver;
