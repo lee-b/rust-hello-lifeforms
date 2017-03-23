@@ -1,15 +1,15 @@
 extern crate rand;
-use rand::{thread_rng, Rng};
+use rand::Rng;
 
 type Fitness = f64;
 
 #[derive(PartialEq,Clone,Debug)]
 struct Individual {
-    genes : u32
+    genes: u32,
 }
 
 struct Population {
-    individuals : Vec<Individual>
+    individuals: Vec<Individual>,
 }
 
 impl Population {
@@ -28,8 +28,8 @@ impl Population {
 struct Evaluator;
 
 impl Evaluator {
-    fn evaluate(&self,  indiv: &Individual) -> Fitness {
-        ((indiv.genes as f64) / 1_000_000.0f64)
+    fn evaluate(&self, indiv: &Individual) -> Fitness {
+        ((indiv.genes as f64) / 2_000_000.0f64)
     }
 }
 
@@ -40,7 +40,10 @@ fn select_indiv<'a, R: Rng>(pop: &'a [Individual], rng: &mut R) -> &'a Individua
     rng.choose(pop).expect("select_indiv(): rng.choose() returned None!")
 }
 
-fn naturally_select_indiv<'a, R: Rng>(pop: &'a Population, rng: &mut R, eval: &mut Evaluator) -> &'a Individual {
+fn naturally_select_indiv<'a, R: Rng>(pop: &'a Population,
+                                      rng: &mut R,
+                                      eval: &mut Evaluator)
+                                      -> &'a Individual {
     let pop_slice = &*pop.individuals;
 
     let suitor1 = select_indiv(pop_slice, rng);
@@ -56,27 +59,34 @@ fn naturally_select_indiv<'a, R: Rng>(pop: &'a Population, rng: &mut R, eval: &m
     }
 }
 
-fn select_parents<'a, R: Rng>(pop: &'a Population, rng: &mut R, eval: &mut Evaluator) -> (&'a Individual, &'a Individual) {
+fn select_parents<'a, R: Rng>(pop: &'a Population,
+                              rng: &mut R,
+                              eval: &mut Evaluator)
+                              -> (&'a Individual, &'a Individual) {
     assert!(pop.individuals.len() > 1);
 
     // FIXME: this doesn't avoid mom and dad being the same Individual
     let mom = naturally_select_indiv(pop, rng, eval);
     let dad = naturally_select_indiv(pop, rng, eval);
 
-    return (mom, dad)
+    return (mom, dad);
 }
 
 impl Evolver {
-    fn evolve<'a, R: Rng>(&self, old_pop: &Population, rng : &mut R, eval: &mut Evaluator) -> Population {
+    fn evolve<'a, R: Rng>(&self,
+                          old_pop: &Population,
+                          rng: &mut R,
+                          eval: &mut Evaluator)
+                          -> Population {
         let mut new_indivs = Vec::new();
         let pop_size = old_pop.individuals.len();
 
         assert!(pop_size >= 2);
- 
-        for _child_num in 1..pop_size+1 {
-//            println!("    Evolving individual {} of {}", child_num, pop_size);
+
+        for _child_num in 1..pop_size + 1 {
+            //            println!("    Evolving individual {} of {}", child_num, pop_size);
             let (mom, dad) = select_parents(old_pop, rng, eval);
-//            println!("Selected parents: {} and {}", mom, dad);
+            //            println!("Selected parents: {} and {}", mom, dad);
 
             let child = breed(mom, dad);
             new_indivs.push(child);
@@ -86,7 +96,7 @@ impl Evolver {
     }
 }
 
-fn breed(mom : &Individual, dad: &Individual) -> Individual {
+fn breed(mom: &Individual, dad: &Individual) -> Individual {
     Individual { genes: ((mom.genes + dad.genes) as f64 * 1.2) as u32 }
 }
 
@@ -95,33 +105,42 @@ fn main() {
 
     let mut rng = rand::thread_rng();
 
-    let mut pop : Population = Population::new(1_000_000, &mut rng);
+    let mut pop: Population = Population::new(1_000_000, &mut rng);
     let evolver = Evolver;
     let mut evaluator = Evaluator;
-    let mut peak_fitness = 0f64 as Fitness;
+
+    let mut peak_fitness: Option<Fitness> = None;
+    let mut peak_indiv: Option<Individual> = None;
 
     loop {
-        let mut best_fitness : Fitness = 0.0f64;
+        let mut best_fitness: Option<Fitness> = None;
+        let mut best_indiv: Option<Individual> = None;
+
         for indiv in pop.individuals.iter() {
             let fitness = evaluator.evaluate(indiv);
 
-            if fitness > best_fitness {
-                best_fitness = fitness;
+            if best_fitness == None || fitness > best_fitness.unwrap() {
+                best_fitness = Some(fitness);
+                best_indiv = Some(indiv.clone());
             }
         }
 
-        if best_fitness > peak_fitness {
+        if best_fitness == None || best_fitness > peak_fitness {
             peak_fitness = best_fitness;
+            peak_indiv = best_indiv.clone();
         }
 
-        if peak_fitness > 90f64 {
-            println!("{}% fitness achieved.  Good enough.", peak_fitness);
-            break
+        if peak_fitness.unwrap() > 90f64 {
+            println!("{}% fitness achieved.  Good enough.",
+                     &peak_fitness.unwrap());
+            break;
         } else {
-            println!("{}% fitness achieved.  Insufficient.  Evolving population...", peak_fitness);
+            println!("{}% fitness achieved.  Insufficient.  Evolving population...",
+                     &peak_fitness.unwrap());
             let new_pop = evolver.evolve(&pop, &mut rng, &mut evaluator);
             pop = new_pop;
         }
     }
-}
 
+    println!("Evolved individual is {:#?}", peak_indiv.unwrap());
+}
