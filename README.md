@@ -32,17 +32,8 @@ I just realised that my C++ version probably could've been optimised a lot, just
 
 
 
-Building
---------
+Building & Running
+------------------
 
-For a normal build, just run 'cargo build'
-
-For an optimised build, run ./opt_build.sh
-
-
-Usage
------
-
-Run target/lforms
-
+Execute `cargo run -r`
 
