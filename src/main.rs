@@ -17,7 +17,7 @@ impl Population {
         let mut indivs = Vec::new();
 
         for _ in 0..pop_size {
-            let indiv = Individual { genes: rng.gen_range(1, 32) };
+            let indiv = Individual { genes: rng.gen_range(1..32) };
             indivs.push(indiv);
         }
 
@@ -29,7 +29,7 @@ struct Evaluator;
 
 impl Evaluator {
     fn evaluate(&self, indiv: &Individual) -> Fitness {
-        ((indiv.genes as f64) / 2_000_000.0f64)
+        (indiv.genes as f64) / 2_000_000.0f64
     }
 }
 
@@ -37,7 +37,10 @@ struct Evolver;
 
 
 fn select_indiv<'a, R: Rng>(pop: &'a [Individual], rng: &mut R) -> &'a Individual {
-    rng.choose(pop).expect("select_indiv(): rng.choose() returned None!")
+    // randomly choose a single individual from the population, panicking if the population
+    // is empty.
+    let idx = rng.gen_range(0..pop.len());
+    &pop[idx]
 }
 
 fn naturally_select_indiv<'a, R: Rng>(pop: &'a Population,
@@ -131,11 +134,11 @@ fn main() {
         }
 
         if peak_fitness.unwrap() > 90f64 {
-            println!("{}% fitness achieved.  Good enough.",
+            println!("{:<3.5}% fitness achieved.\n\tGood enough.",
                      &peak_fitness.unwrap());
             break;
         } else {
-            println!("{}% fitness achieved.  Insufficient.  Evolving population...",
+            println!("{:<3.5}% fitness achieved.\n\tInsufficient.\n\tEvolving population...",
                      &peak_fitness.unwrap());
             let new_pop = evolver.evolve(&pop, &mut rng, &mut evaluator);
             pop = new_pop;

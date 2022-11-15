@@ -4,8 +4,8 @@ version = "0.1.0"
 authors = [ "Lee Braiden <leebraid@gmail.com>" ]
 
 [dependencies]
-rand = "*"
+rand = "^0.8.5"
 
 [[bin]]
 name = "lforms"
-
+path = "src/main.rs"
